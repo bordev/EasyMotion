@@ -21,11 +21,11 @@ namespace EasyMotion.Implementation.KeyProcessing
             _easyMotionNavigator = easyMotionNavigator;
         }
 
+/*
         public override void TextInput(TextCompositionEventArgs args)
         {
             base.TextInput(args);
 
-/*
             switch (_easyMotionUtil.State)
             {
                 case EasyMotionState.Disabled:
@@ -42,8 +42,8 @@ namespace EasyMotion.Implementation.KeyProcessing
                     Debug.Assert(false);
                     break;
             }
-*/
         }
+*/
 
         public override void KeyUp(KeyEventArgs args)
         {
@@ -55,6 +55,7 @@ namespace EasyMotion.Implementation.KeyProcessing
             }
         }
 
+/*
         private void TextInputLookingForChar(TextCompositionEventArgs args)
         {
             if (args.Text.Length == 1)
@@ -63,7 +64,9 @@ namespace EasyMotion.Implementation.KeyProcessing
                 args.Handled = true;
             }
         }
+*/
 
+/*
         private void TextInputLookingForDecision(TextCompositionEventArgs args)
         {
             if (args.Text.Length > 0)
@@ -80,5 +83,6 @@ namespace EasyMotion.Implementation.KeyProcessing
                 args.Handled = true;
             }
         }
+*/
     }
 }

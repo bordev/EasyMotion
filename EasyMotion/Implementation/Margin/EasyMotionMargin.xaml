@@ -6,17 +6,22 @@
              mc:Ignorable="d" 
              d:DesignHeight="100" 
              d:DesignWidth="400"
-             DataContext="{Binding RelativeSource={RelativeSource Self}}">
+             DataContext="{Binding RelativeSource={RelativeSource Self}}"
+             Focusable="True">
 
-    <StackPanel>
+    <StackPanel IsVisibleChanged="StackPanel_IsVisibleChanged">
         <TextBox 
             x:Name="statusLine"
             IsReadOnly="True"
-            Text="{Binding Path=StatusLine}" />
+            Text="{Binding Path=StatusLine}" 
+            Focusable="False"
+            />
         <TextBox 
             x:Name="cmdLine" 
-            Text="{Binding Path=CmdLine}" TextChanged="cmdLine_TextChanged" KeyDown="CmdLine_OnKeyDown
-            "/>
+            IsReadOnly="False"
+            TextChanged="cmdLine_TextChanged" 
+            KeyDown="CmdLine_OnKeyDown"
+            Focusable="True"/>
 
     </StackPanel>
 </UserControl>

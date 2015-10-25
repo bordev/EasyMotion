@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 using Microsoft.VisualStudio.PlatformUI;
 
 namespace EasyMotion.Implementation.Margin
@@ -19,6 +20,8 @@ namespace EasyMotion.Implementation.Margin
     public partial class EasyMotionMargin : UserControl
     {
         public event EventHandler<TextChangedEventArgs> CmdChanged;
+        public event EventHandler EscapeKey;
+
         public static readonly DependencyProperty StatusLineProperty = DependencyProperty.Register(
             "StatusLine",
             typeof(string),
@@ -41,7 +44,11 @@ namespace EasyMotion.Implementation.Margin
 
         public void EditCmd()
         {
-            cmdLine.Focus();
+            Dispatcher.CurrentDispatcher.Invoke(() =>
+            {
+                System.Diagnostics.Debug.WriteLine("Focus()");
+                cmdLine.Focus();
+            });
             ClearCmd();
         }
         public void ClearCmd()
@@ -59,9 +66,20 @@ namespace EasyMotion.Implementation.Margin
 
         private void CmdLine_OnKeyDown(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.Escape)
+            if (EscapeKey != null && e.Key == Key.Escape)
             {
-                cmdLine.Text = "";
+                EscapeKey(this, EventArgs.Empty);
+            }
+        }
+
+        private void StackPanel_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (this.Visibility == Visibility.Visible)
+            {
+                this.Dispatcher.BeginInvoke((Action)delegate
+                {
+                    Keyboard.Focus(cmdLine);
+                }, DispatcherPriority.Render);
             }
         }
     }

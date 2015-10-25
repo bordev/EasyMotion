@@ -24,8 +24,10 @@ namespace EasyMotion.Implementation.Margin
             _easyMotionUtil.StateChanged += OnStateChanged;
             _control = new EasyMotionMargin();
             _control.CmdChanged += OnCmdChanged;
+            _control.EscapeKey += OnEscapeKey;
             UpdateControl();
         }
+
 
         private void OnCmdChanged(object sender, TextChangedEventArgs e)
         {
@@ -48,11 +50,17 @@ namespace EasyMotion.Implementation.Margin
                 }
             }
         }
+        private void OnEscapeKey(object sender, EventArgs e)
+        {
+            _easyMotionUtil.ChangeToDisabled();
+            _control.ClearCmd();
+        }
 
         private void Unsubscribe()
         {
             _easyMotionUtil.StateChanged -= OnStateChanged;
             _control.CmdChanged -= OnCmdChanged;
+            _control.EscapeKey -= OnEscapeKey;
         }
 
         private void UpdateControl()
@@ -74,6 +82,7 @@ namespace EasyMotion.Implementation.Margin
                 case EasyMotionState.LookingCharNotFound:
                     _control.Visibility = Visibility.Visible;
                     _control.StatusLine = string.Format("Character '{0}' not found. Type the character you want to search for", _easyMotionUtil.TargetChar);
+                    _control.ClearCmd();
                     break;
                 default:
                     Debug.Assert(false);
