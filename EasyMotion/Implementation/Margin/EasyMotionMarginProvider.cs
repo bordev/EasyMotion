@@ -19,17 +19,20 @@ namespace EasyMotion.Implementation.Margin
         internal const string Name = "Easy Motion Margin";
 
         private readonly IEasyMotionUtilProvider _easyMotionUtilProvider;
+        private readonly IEasyMotionNavigatorProvider _easyMotionNavigatorProvider;
 
         [ImportingConstructor]
-        internal EasyMotionMarginProvider(IEasyMotionUtilProvider easyMotionUtilProvider)
+        internal EasyMotionMarginProvider(IEasyMotionUtilProvider easyMotionUtilProvider, IEasyMotionNavigatorProvider easyMotionNavigatorProvider)
         {
             _easyMotionUtilProvider = easyMotionUtilProvider;
+            _easyMotionNavigatorProvider = easyMotionNavigatorProvider;
         }
 
         public IWpfTextViewMargin CreateMargin(IWpfTextViewHost wpfTextViewHost, IWpfTextViewMargin marginContainer)
         {
             var easyMotionUtil = _easyMotionUtilProvider.GetEasyMotionUtil(wpfTextViewHost.TextView);
-            return new EasyMotionMarginController(easyMotionUtil);
+            var easyMotionNavigator = _easyMotionNavigatorProvider.GetEasyMotionNavigator(wpfTextViewHost.TextView);
+            return new EasyMotionMarginController(easyMotionUtil, easyMotionNavigator);
         }
     }
 }

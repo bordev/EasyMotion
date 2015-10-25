@@ -13,6 +13,10 @@
             x:Name="statusLine"
             IsReadOnly="True"
             Text="{Binding Path=StatusLine}" />
+        <TextBox 
+            x:Name="cmdLine" 
+            Text="{Binding Path=CmdLine}" TextChanged="cmdLine_TextChanged" KeyDown="CmdLine_OnKeyDown
+            "/>
 
     </StackPanel>
 </UserControl>

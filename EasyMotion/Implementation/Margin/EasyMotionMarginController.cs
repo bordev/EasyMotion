@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Media;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using Microsoft.VisualStudio.Text.Editor;
 
 namespace EasyMotion.Implementation.Margin
@@ -12,19 +14,45 @@ namespace EasyMotion.Implementation.Margin
     internal sealed class EasyMotionMarginController : IWpfTextViewMargin
     {
         private readonly IEasyMotionUtil _easyMotionUtil;
+        private readonly IEasyMotionNavigator _easyMotionNavigator;
         private readonly EasyMotionMargin _control;
 
-        internal EasyMotionMarginController(IEasyMotionUtil easyMotionUtil)
+        internal EasyMotionMarginController(IEasyMotionUtil easyMotionUtil, IEasyMotionNavigator easyMotionNavigator)
         {
             _easyMotionUtil = easyMotionUtil;
+            _easyMotionNavigator = easyMotionNavigator;
             _easyMotionUtil.StateChanged += OnStateChanged;
             _control = new EasyMotionMargin();
+            _control.CmdChanged += OnCmdChanged;
             UpdateControl();
+        }
+
+        private void OnCmdChanged(object sender, TextChangedEventArgs e)
+        {
+            Debug.WriteLine(e.Changes);
+            var cmd = ((TextBox)e.Source).Text;
+            if (cmd.Length == 1)
+            {
+                _easyMotionUtil.ChangeToLookingForDecision(cmd[0]);
+            }
+            else if (cmd.Length == 2)
+            {
+                if (_easyMotionNavigator.NavigateTo(cmd[1].ToString()))
+                {
+                    _easyMotionUtil.ChangeToDisabled();
+                    _control.ClearCmd();
+                }
+                else
+                {
+                    SystemSounds.Beep.Play();
+                }
+            }
         }
 
         private void Unsubscribe()
         {
             _easyMotionUtil.StateChanged -= OnStateChanged;
+            _control.CmdChanged -= OnCmdChanged;
         }
 
         private void UpdateControl()
@@ -37,6 +65,7 @@ namespace EasyMotion.Implementation.Margin
                 case EasyMotionState.LookingForChar:
                     _control.Visibility = Visibility.Visible;
                     _control.StatusLine = "Type the character you want to search for";
+                    _control.EditCmd();
                     break;
                 case EasyMotionState.LookingForDecision:
                     _control.Visibility = Visibility.Visible;

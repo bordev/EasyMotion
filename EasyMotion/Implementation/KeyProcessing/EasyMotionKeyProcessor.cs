@@ -25,6 +25,7 @@ namespace EasyMotion.Implementation.KeyProcessing
         {
             base.TextInput(args);
 
+/*
             switch (_easyMotionUtil.State)
             {
                 case EasyMotionState.Disabled:
@@ -41,6 +42,7 @@ namespace EasyMotion.Implementation.KeyProcessing
                     Debug.Assert(false);
                     break;
             }
+*/
         }
 
         public override void KeyUp(KeyEventArgs args)

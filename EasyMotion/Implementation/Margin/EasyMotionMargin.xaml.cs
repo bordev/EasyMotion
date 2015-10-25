@@ -18,6 +18,7 @@ namespace EasyMotion.Implementation.Margin
 {
     public partial class EasyMotionMargin : UserControl
     {
+        public event EventHandler<TextChangedEventArgs> CmdChanged;
         public static readonly DependencyProperty StatusLineProperty = DependencyProperty.Register(
             "StatusLine",
             typeof(string),
@@ -36,6 +37,32 @@ namespace EasyMotion.Implementation.Margin
             statusLine.SetResourceReference(Control.ForegroundProperty, EnvironmentColors.DropDownTextBrushKey);
             statusLine.SetResourceReference(Control.BackgroundProperty, EnvironmentColors.DropDownBackgroundBrushKey);
             statusLine.SetResourceReference(Control.BorderBrushProperty, EnvironmentColors.DropDownBorderBrushKey);
+        }
+
+        public void EditCmd()
+        {
+            cmdLine.Focus();
+            ClearCmd();
+        }
+        public void ClearCmd()
+        {
+            cmdLine.Text = "";
+        }
+
+        private void cmdLine_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (CmdChanged != null)
+            {
+                CmdChanged(this, e);
+            }
+        }
+
+        private void CmdLine_OnKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Escape)
+            {
+                cmdLine.Text = "";
+            }
         }
     }
 }

@@ -65,6 +65,7 @@ namespace EasyMotion.Implementation.EasyMotionUtil
 
         private void RaiseStateChanged()
         {
+            System.Diagnostics.Debug.WriteLine("RaiseStateChanged");
             var list = StateChanged;
             if (list != null)
             {

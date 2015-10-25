@@ -156,6 +156,7 @@ namespace EasyMotion.Implementation.Adornment
                 return false;
             }
 
+            _wpfTextView.VisualElement.Focus();
             _wpfTextView.Caret.MoveTo(point);
             return true;
         }
