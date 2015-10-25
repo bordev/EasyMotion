@@ -31,7 +31,6 @@ namespace EasyMotion.Implementation.Margin
 
         private void OnCmdChanged(object sender, TextChangedEventArgs e)
         {
-            Debug.WriteLine(e.Changes);
             var cmd = ((TextBox)e.Source).Text;
             if (cmd.Length == 1)
             {

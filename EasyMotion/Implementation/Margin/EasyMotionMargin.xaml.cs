@@ -44,11 +44,7 @@ namespace EasyMotion.Implementation.Margin
 
         public void EditCmd()
         {
-            Dispatcher.CurrentDispatcher.Invoke(() =>
-            {
-                System.Diagnostics.Debug.WriteLine("Focus()");
-                cmdLine.Focus();
-            });
+            cmdLine.Focus();
             ClearCmd();
         }
         public void ClearCmd()
