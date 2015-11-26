@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Controls;
@@ -15,10 +16,8 @@ namespace EasyMotion.Implementation.Adornment
 {
     internal sealed class EasyMotionAdornmentController : IEasyMotionNavigator
     {
-        private static readonly string[] NavigationKeys =
-            "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-            .Select(x => x.ToString())
-            .ToArray();
+        private static string[] _navigationKeysLong;
+        private static string[] _navigationKeysShort;
 
         private readonly IEasyMotionUtil _easyMotionUtil;
         private readonly IWpfTextView _wpfTextView;
@@ -34,6 +33,55 @@ namespace EasyMotion.Implementation.Adornment
             _wpfTextView = wpfTextview;
             _editorFormatMap = editorFormatMap;
             _classificationFormatMap = classificationFormatMap;
+            if (_navigationKeysLong == null)
+            {
+                _navigationKeysLong = CreateNavigationKeysLong();
+            }
+            if (_navigationKeysShort == null)
+            {
+                _navigationKeysShort = CreateNavigationKeysShort();
+            }
+        }
+
+        private static string[] CreateNavigationKeysShort()
+        {
+            return "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".Select(c => c.ToString()).ToArray();
+        }
+
+        private static string[] CreateNavigationKeysLong()
+        {
+            var r1 = "qwertyuiop";
+            var r2 = "asdfghjkl";
+            var r3 = "zxcvbnm";
+            var combis = new List<string>();
+            combis.AddRange("abcdefghijklmnopqrstuvwxyz".Select(c => c.ToString() + c.ToString()));
+            Action<string> hkeys = (a) =>
+            {
+                for (int i = 0; i < a.Length - 1; i++)
+                {
+                    combis.Add(a[i].ToString() + a[i + 1]);
+                    combis.Add(a[i + 1].ToString() + a[i]);
+                }
+            };
+            Action<string, string> vkeys = (a, b) =>
+            {
+                for (int i = 0; i < a.Length; i++)
+                {
+                    if ((i >= b.Length) || (i >= a.Length)) continue;
+                    combis.Add(a[i].ToString() + b[i]);
+                    combis.Add(b[i].ToString() + a[i]);
+                }
+            };
+            hkeys(r1);
+            hkeys(r2);
+            hkeys(r3);
+            vkeys(r1, r2);
+            vkeys(r2, r3);
+            var keypairs =
+                "hjkl yuiop bnm gfdsa trewq vcxz".Where(c => !char.IsWhiteSpace(c))
+                    .SelectMany(c => combis.Where(s => s.StartsWith(c.ToString()))).ToArray();
+
+            return keypairs.ToArray();
         }
 
         internal void SetAdornmentLayer(IAdornmentLayer adornmentLayer)
@@ -101,14 +149,29 @@ namespace EasyMotion.Implementation.Adornment
             var startPoint = textViewLines.FirstVisibleLine.Start;
             var endPoint = textViewLines.LastVisibleLine.End;
             var snapshot = startPoint.Snapshot;
+
+            var count = 0;
+            for (int i = startPoint.Position; i < endPoint.Position; i++)
+            {
+                var point = new SnapshotPoint(snapshot, i);
+                if (char.ToLower(point.GetChar()) == char.ToLower(_easyMotionUtil.TargetChar))
+                {
+                    count++;
+                }
+            }
+            var navigationKeys = _navigationKeysShort;
+            if (count > _navigationKeysShort.Length)
+            {
+                navigationKeys = _navigationKeysLong;
+            }
             int navigateIndex = 0;
             for (int i = startPoint.Position; i < endPoint.Position; i++)
             {
                 var point = new SnapshotPoint(snapshot, i);
 
-                if (Char.ToLower(point.GetChar()) == Char.ToLower(_easyMotionUtil.TargetChar) && navigateIndex < NavigationKeys.Length)
+                if (char.ToLower(point.GetChar()) == char.ToLower(_easyMotionUtil.TargetChar) && navigateIndex < navigationKeys.Length)
                 {
-                    string key = NavigationKeys[navigateIndex];
+                    var key = navigationKeys[navigateIndex];
                     navigateIndex++;
                     AddNavigateToPoint(textViewLines, point, key);
                 }
@@ -126,21 +189,23 @@ namespace EasyMotion.Implementation.Adornment
 
             var resourceDictionary = _editorFormatMap.GetProperties(EasyMotionNavigateFormatDefinition.Name);
 
-            var span = new SnapshotSpan(point, 1);
+            var span = new SnapshotSpan(point, key.Length);
             var bounds = textViewLines.GetCharacterBounds(point);
 
-            var textBox = new TextBox();
-            textBox.Text = key;
-            textBox.FontFamily = _classificationFormatMap.DefaultTextProperties.Typeface.FontFamily;
-            textBox.Foreground = resourceDictionary.GetForegroundBrush(EasyMotionNavigateFormatDefinition.DefaultForegroundBrush);
-            textBox.Background = resourceDictionary.GetBackgroundBrush(EasyMotionNavigateFormatDefinition.DefaultBackgroundBrush);
-            textBox.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+            var label = new Label();
+            label.Content = key;
+            label.FontFamily = _classificationFormatMap.DefaultTextProperties.Typeface.FontFamily;
+            label.FontSize = 10.0;
+            label.Foreground = resourceDictionary.GetForegroundBrush(EasyMotionNavigateFormatDefinition.DefaultForegroundBrush);
+            label.Background = resourceDictionary.GetBackgroundBrush(EasyMotionNavigateFormatDefinition.DefaultBackgroundBrush);
+            //            textBox.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
 
-            Canvas.SetTop(textBox, bounds.TextTop);
-            Canvas.SetLeft(textBox, bounds.Left);
-            Canvas.SetZIndex(textBox, 10);
 
-            _adornmentLayer.AddAdornment(span, _tag, textBox);
+            Canvas.SetTop(label, bounds.TextTop);
+            Canvas.SetLeft(label, bounds.Left);
+            Canvas.SetZIndex(label, 10);
+
+            _adornmentLayer.AddAdornment(span, _tag, label);
         }
 
         public bool NavigateTo(string key)

@@ -36,9 +36,9 @@ namespace EasyMotion.Implementation.Margin
             {
                 _easyMotionUtil.ChangeToLookingForDecision(cmd[0]);
             }
-            else if (cmd.Length == 2)
+            else if (cmd.Length > 1)
             {
-                if (_easyMotionNavigator.NavigateTo(cmd[1].ToString()))
+                if (_easyMotionNavigator.NavigateTo(cmd.Substring(1)))
                 {
                     _easyMotionUtil.ChangeToDisabled();
                     _control.ClearCmd();
